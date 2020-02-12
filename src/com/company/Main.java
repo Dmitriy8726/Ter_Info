@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.lang.Math;
+import java.util.Scanner;
 
 public class Main {
 
@@ -213,15 +214,20 @@ public class Main {
         FileReader reader_F1 = new FileReader("resource\\file\\F1.txt");
         FileReader reader_F2 = new FileReader("resource\\file\\F2.txt");
         FileReader reader_F3 = new FileReader("resource\\file\\F3.txt");
+        Scanner scan = new Scanner(reader_F3);
 
         int ch;
         int all_F1 = 0, all_F2 = 0, all_F3 = 0;
         HashMap<String, Float> map_F1 = new HashMap<>();
         HashMap<String, Float> map_F2 = new HashMap<>();
+        HashMap<String, Float> map_F3 = new HashMap<>();
         HashMap<String, Float> map_F1_prob = new HashMap<>();
         HashMap<String, Float> map_F2_prob = new HashMap<>();
+        HashMap<String, Float> map_F3_prob = new HashMap<>();
 
         //Подсчет вероятностей
+
+        //1
         ch = reader_F1.read();
         String str = String.valueOf((char)ch);
         while ((ch = reader_F1.read()) != -1) {
@@ -243,6 +249,7 @@ public class Main {
             map_F1_prob.put(entry.getKey().toString(), (Float)entry.getValue() / all_F1);
         }
 
+        //2
         ch = reader_F2.read();
         str = String.valueOf((char)ch);
         while ((ch = reader_F2.read()) != -1) {
@@ -264,20 +271,52 @@ public class Main {
             map_F2_prob.put(entry.getKey().toString(), (Float)entry.getValue() / all_F2);
         }
 
+        //3
+        while (scan.hasNextLine()) {
+            str += scan.nextLine();
+        }
+        str = str.toLowerCase();
+        str = str.replaceAll("[^а-яё]", "");
+        for (int i = 0; i < str.length() - 1; i++) {
+            String temp = str.substring(i , i + 1) + str.substring(i + 1 , i + 2);
+            if (!map_F3.containsKey(temp)) {
+                map_F3.put(temp, 1.0f);
+            } else {
+                float j = map_F3.get(temp) + 1;
+                map_F3.put(temp, j);
+            }
+        }
+
+        for(Map.Entry entry: map_F3.entrySet()) {
+            all_F3 += (Float)entry.getValue();
+        }
+
+        for(Map.Entry entry: map_F3.entrySet()) {
+            map_F3_prob.put(entry.getKey().toString(), (Float)entry.getValue() / all_F3);
+        }
+
         //Подсчет энтропии Шенона
+
+        //1
         double shenon_F1 = 0;
         for(Map.Entry entry: map_F1_prob.entrySet()) {
             shenon_F1 += (Float)entry.getValue() * log_2(2, 1 / (Float)entry.getValue());
         }
         System.out.println(shenon_F1 / 2); //Практическая
 
+        //2
         double shenon_F2 = 0;
         for(Map.Entry entry: map_F2_prob.entrySet()) {
             shenon_F2 += (Float)entry.getValue() * log_2(2, 1 / (Float)entry.getValue());
         }
         System.out.println(shenon_F2 / 2); //Практическая
 
-
+        //3
+        double shenon_F3 = 0;
+        for(Map.Entry entry: map_F3_prob.entrySet()) {
+            shenon_F3 += (Float)entry.getValue() * log_2(2, 1 / (Float)entry.getValue());
+        }
+        System.out.println(shenon_F3 / 2); //Практическая
     }
 
     static double log_2 (double base, double number) {
